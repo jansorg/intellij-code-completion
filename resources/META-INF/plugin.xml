@@ -1,0 +1,22 @@
+<idea-plugin>
+    <id>dev.j-a.sample.code-completion</id>
+    <name>Code Completion</name>
+    <version>0.1.0</version>
+    <vendor email="mail@ja-dev.eu" url="https://www.j-a.dev">Joachim Ansorg</vendor>
+
+    <description><![CDATA[
+      Simple plugin to demonstrate code completion.
+      It suggest's words from the dictionary.
+    ]]></description>
+
+    <idea-version since-build="192.0"/>
+
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <completion.contributor language="any"
+                                implementationClass="dev.ja.samples.completion.StringLiteralDictionaryContributor"/>
+
+        <preloadingActivity implementation="dev.ja.samples.completion.DictionaryLoader"/>
+    </extensions>
+</idea-plugin>
