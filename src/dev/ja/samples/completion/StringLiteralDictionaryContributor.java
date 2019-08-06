@@ -16,7 +16,8 @@ public class StringLiteralDictionaryContributor extends CompletionContributor {
                 new DictionaryCompletionProvider(false));
 
         // completions for content of string literals
-        extend(CompletionType.BASIC, new StringLiteralPattern(),
+        extend(CompletionType.BASIC,
+                PlatformPatterns.psiElement().with(new StringLiteralPattern()),
                 new DictionaryCompletionProvider(false));
 
         // always suggest when invoked manually

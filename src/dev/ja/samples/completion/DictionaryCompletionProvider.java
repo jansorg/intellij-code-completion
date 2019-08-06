@@ -30,21 +30,32 @@ class DictionaryCompletionProvider extends CompletionProvider<CompletionParamete
             return;
         }
 
-        List<CompressedDictionary> dicts = Dictionary.get();
-        if (dicts == null || dicts.isEmpty()) {
-            return;
-        }
-
         String prefix = result.getPrefixMatcher().getPrefix();
         if (prefix.isEmpty()) {
             return;
+        }
+
+        // make sure that our prefix is the last word
+        // for plain text file, all the content up to the caret is the prefix
+        // we don't want that, because we're only completing a single word
+        CompletionResultSet dictResult;
+        int lastSpace = prefix.lastIndexOf(' ');
+        if (lastSpace >= 0 && lastSpace < prefix.length() - 1) {
+            prefix = prefix.substring(lastSpace + 1);
+            dictResult = result.withPrefixMatcher(prefix);
+        } else {
+            dictResult = result;
         }
 
         int length = prefix.length();
         char firstChar = prefix.charAt(0);
         boolean isUppercase = Character.isUpperCase(firstChar);
 
-        CompletionResultSet dictResult = result.caseInsensitive();
+        List<CompressedDictionary> dicts = Dictionary.get();
+        if (dicts == null || dicts.isEmpty()) {
+            return;
+        }
+
         for (CompressedDictionary dict : dicts) {
             dict.getWords(Character.toLowerCase(firstChar), length, length + 20, word -> {
                 ProgressManager.checkCanceled();

@@ -4,13 +4,12 @@ import com.intellij.lang.ASTNode;
 import com.intellij.lang.Language;
 import com.intellij.lang.LanguageParserDefinitions;
 import com.intellij.lang.ParserDefinition;
-import com.intellij.patterns.InitialPatternCondition;
-import com.intellij.patterns.ObjectPattern;
+import com.intellij.patterns.PatternCondition;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ProcessingContext;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Pattern which only accepts PsiElements, which either are a string literal or a comment of the current language.
@@ -18,40 +17,35 @@ import org.jetbrains.annotations.Nullable;
  *
  * @author jansorg
  */
-class StringLiteralPattern extends ObjectPattern<PsiElement, StringLiteralPattern> {
+class StringLiteralPattern extends PatternCondition<PsiElement> {
     StringLiteralPattern() {
-        super(new InitialPatternCondition<PsiElement>(PsiElement.class) {
-            @Override
-            public boolean accepts(@Nullable Object o, ProcessingContext context) {
-                if (!(o instanceof PsiElement)) {
-                    return false;
-                }
+        super("stringLiteralPattern()");
+    }
 
-                PsiElement psi = (PsiElement) o;
+    @Override
+    public boolean accepts(@NotNull PsiElement psi, ProcessingContext context) {
+        Language language = PsiUtilCore.findLanguageFromElement(psi);
+        ParserDefinition definition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
+        if (definition == null) {
+            return false;
+        }
 
-                Language language = PsiUtilCore.findLanguageFromElement(psi);
-                ParserDefinition definition = LanguageParserDefinitions.INSTANCE.forLanguage(language);
-                if (definition == null) {
-                    return false;
-                }
+        // suggest completions in string and comment literals
+        TokenSet tokens = TokenSet.orSet(
+                definition.getStringLiteralElements(),
+                definition.getCommentTokens());
 
-                // suggest completions in string and comment literals
-                TokenSet tokens = TokenSet.orSet(
-                        definition.getStringLiteralElements(),
-                        definition.getCommentTokens());
+        ASTNode node = psi.getNode();
+        if (node == null) {
+            return false;
+        }
 
-                ASTNode node = psi.getNode();
-                if (node == null) {
-                    return false;
-                }
+        if (tokens.contains(node.getElementType())) {
+            return true;
+        }
 
-                if (tokens.contains(node.getElementType())) {
-                    return true;
-                }
-
-                node = node.getTreeParent();
-                return node != null && tokens.contains(node.getElementType());
-            }
-        });
+        return false;
+//        node = node.getTreeParent();
+//        return node != null && tokens.contains(node.getElementType());
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 class Dictionary {
     private static final List<CompressedDictionary> bundledDictionaries = ContainerUtil.createLockFreeCopyOnWriteList();
 
+    // load() loads all build-in dictionaries in a thread-safe manner
     static void load() {
         for (BundledDictionaryProvider provider : BundledDictionaryProvider.EP_NAME.getExtensions()) {
             for (String name : provider.getBundledDictionaries()) {
