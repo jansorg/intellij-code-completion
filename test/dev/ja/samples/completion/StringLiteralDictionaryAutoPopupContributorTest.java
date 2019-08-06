@@ -5,12 +5,15 @@ import com.intellij.testFramework.fixtures.CompletionAutoPopupTester;
 import org.junit.Assert;
 
 /**
+ * We're using the Junit 3 base class, because we the Junit4 variant doesn't support runInDispatchThread() properly.
+ *
  * @author jansorg
  */
 public class StringLiteralDictionaryAutoPopupContributorTest extends BasePlatformTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        // preloadingActivity don't seem to be run in tests
         Dictionary.load();
     }
 
